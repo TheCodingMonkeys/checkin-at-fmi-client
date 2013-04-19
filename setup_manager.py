@@ -4,7 +4,7 @@ from uuid import getnode as get_mac
 mac = get_mac() # mac adress as 48bit intiger
 from datetime import datetime
 
-class CheckResources:
+class Setup_Manager:
 
     def __init__(self, server_url, device):
         self.server_url = server_url
