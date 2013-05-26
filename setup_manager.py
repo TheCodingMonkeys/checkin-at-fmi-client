@@ -1,7 +1,6 @@
 import os.path 
 import urllib, urllib2, time
 from uuid import getnode as get_mac
-mac = get_mac() # mac adress as 48bit intiger
 from datetime import datetime
 
 class Setup_Manager:
@@ -16,10 +15,10 @@ class Setup_Manager:
 
     def check_io(self):
         if os.path.exists(self.device):
-            io_status = True
+            self.io_status = True
             print(self.device + " founded")
         else:
-            io_status = False
+            self.io_status = False
             print(self.device + " no founded")
 
     def check_db (self):
@@ -36,23 +35,23 @@ class Setup_Manager:
             print("Database not Ready")
 
     def check_server(self):
+        print("Not Checked")
+        #url = self.server_url + 'checkin/status/'
+        #mac = get_mac() # mac adress as 48bit intiger
+        #values = {'mac' : mac,}
 
-        url = self.server_url + 'checkin/status/'
-
-        values = {'mac' : mac,}
-
-        try:
-            print("Checking the server")
-            data = urllib.urlencode(values)          
-            req = urllib2.Request(url, data)
-            response = urllib2.urlopen(req)
-            answer = response.read() 
-            if answer == "ok":
-                self.server_status = True;
-                print(url + " accepted us")
-            else:
-                self.server_status = False
-                print(url + " did not accept us")
-        except Exception, detail:
-            self.server_status = False
-            print("Error conectiong to the server")
+        #try:
+        #    print("Checking the server")
+        #    data = urllib.urlencode(values)          
+        #    req = urllib2.Request(url, data)
+        #    response = urllib2.urlopen(req)
+        #    answer = response.read() 
+        #    if answer == "ok":
+        #        self.server_status = True;
+        #        print(url + " accepted us")
+        #    else:
+        #        self.server_status = False
+        #        print(url + " did not accept us")
+        #except Exception, detail:
+        #    self.server_status = False
+        #    print("Error conectiong to the server")
