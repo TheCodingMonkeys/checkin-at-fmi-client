@@ -35,23 +35,22 @@ class Setup_Manager:
             print("Database not Ready")
 
     def check_server(self):
-        print("Not Checked")
-        #url = self.server_url + 'checkin/status/'
-        #mac = get_mac() # mac adress as 48bit intiger
-        #values = {'mac' : mac,}
+        url = self.server_url + 'checkin/status/'
+        mac = get_mac() # mac adress as 48bit intiger
+        values = {'mac' : mac,}
 
-        #try:
-        #    print("Checking the server")
-        #    data = urllib.urlencode(values)          
-        #    req = urllib2.Request(url, data)
-        #    response = urllib2.urlopen(req)
-        #    answer = response.read() 
-        #    if answer == "ok":
-        #        self.server_status = True;
-        #        print(url + " accepted us")
-        #    else:
-        #        self.server_status = False
-        #        print(url + " did not accept us")
-        #except Exception, detail:
-        #    self.server_status = False
-        #    print("Error conectiong to the server")
+        try:
+            print("Checking the server")
+            data = urllib.urlencode(values)          
+            req = urllib2.Request(url, data)
+            response = urllib2.urlopen(req)
+            answer = response.read() 
+            if answer == "ok":
+                self.server_status = True;
+                print(url + " accepted us")
+            else:
+                self.server_status = False
+                print(url + " did not accept us")
+        except Exception, detail:
+            self.server_status = False
+            print("Error conectiong to the server")
