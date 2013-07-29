@@ -1,13 +1,13 @@
 import os.path 
 import urllib, urllib2, time
-from uuid import getnode as get_mac
 from datetime import datetime
 
 class Setup_Manager:
 
-    def __init__(self, server_url, device):
+    def __init__(self, server_url, device, mac):
         self.server_url = server_url
         self.device = device
+        self.mac = mac
 
         self.io_status = False
         self.db_status = False
@@ -36,8 +36,7 @@ class Setup_Manager:
 
     def check_server(self):
         url = self.server_url + 'checkin/status/'
-        mac = get_mac() # mac adress as 48bit intiger
-        values = {'mac' : mac,}
+        values = {'mac' : self.mac,}
 
         try:
             print("Checking the server")
