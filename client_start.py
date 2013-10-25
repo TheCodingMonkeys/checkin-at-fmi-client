@@ -8,7 +8,7 @@ import urllib, urllib2, time
 import sys, getopt
 
 RFID_device = '/dev/input/event16'
-server_adress = 'http://webdream.bg:8000/'
+server_adress = 'http://localhost:8000/'
 RFID_code_length = 10
 mac = get_mac()
 
