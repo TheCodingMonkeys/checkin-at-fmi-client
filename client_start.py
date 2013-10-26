@@ -6,11 +6,19 @@ from setup_manager import Setup_Manager
 from uuid import getnode as get_mac
 import urllib, urllib2, time
 import sys, getopt
+from threading import Thread
 
 RFID_device = '/dev/input/event16'
 server_adress = 'http://localhost:8000/'
 RFID_code_length = 10
 mac = get_mac()
+
+def send_alive(resources):
+	while True:
+		resources.check_server()
+		if resources.server_status == False:
+			print "Not autenticated"
+		sleep(5)
 
 def send_code(card_code):
 	url = server_adress + 'checkin/'
@@ -39,8 +47,11 @@ if __name__ == '__main__':
 		print "Use -debug for using the debug mode"
 		sys.exit(0)
 
+	resources = Setup_Manager(server_adress, RFID_device, mac)
+	thread = Thread(target = send_alive, args = (resources, ))
+	thread.start()
+
 	if sys.argv[1] == "-start":
-		resources = Setup_Manager(server_adress, RFID_device, mac)
 
 		#Check for IO and DB untill they are available
 		while (resources.io_status == False or resources.db_status == False):
@@ -64,11 +75,8 @@ if __name__ == '__main__':
 				cartKey = ""
 
 	if sys.argv[1] == "-debug":
-		resources = Setup_Manager(server_adress, RFID_device, mac)
-		resources.check_server()
-		if resources.server_status == False:
-			print "Not autenticated"
-		while 1:
+		
+		while True:
 			print "\nPress 1 for 0000000001\nPress 2 for 0000000002\nPress 3 for 0000000003\nOr type a command like [send 1234567890 246473185428129L]"
 			command = raw_input();
 			if command == "1":
