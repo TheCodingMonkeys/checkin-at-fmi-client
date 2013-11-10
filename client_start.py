@@ -8,6 +8,7 @@ import urllib, urllib2, time
 import sys, getopt
 from threading import Thread
 
+dbname = 'checkIn.db'
 RFID_device = '/dev/input/event16'
 server_adress = 'http://localhost:8000/'
 RFID_code_length = 10
@@ -20,7 +21,7 @@ def send_alive(resources):
 			print "Not autenticated"
 		sleep(5)
 
-def send_code(card_code):
+def send_code(resources, card_code):
 	url = server_adress + 'checkin/'
 	now = datetime.now()
 
@@ -48,11 +49,11 @@ if __name__ == '__main__':
 		sys.exit(0)
 
 	resources = Setup_Manager(server_adress, RFID_device, mac)
-	thread = Thread(target = send_alive, args = (resources, ))
-	thread.start()
 
 	if sys.argv[1] == "-start":
 
+		thread = Thread(target = send_alive, args = (resources, ))
+		thread.start()
 		#Check for IO and DB untill they are available
 		while (resources.io_status == False or resources.db_status == False):
 			resources.check_io()
@@ -77,11 +78,15 @@ if __name__ == '__main__':
 	if sys.argv[1] == "-debug":
 		
 		while True:
-			print "\nPress 1 for 0000000001\nPress 2 for 0000000002\nPress 3 for 0000000003\nOr type a command like [send 1234567890 246473185428129L]"
+			print "\nPress 1 for 0000000001\nPress 2 for 0000000002\nPress 3 for 0000000003\nOr type a command like [send CODE MAC]"
 			command = raw_input();
 			if command == "1":
-				send_code("0000000001")
+				send_code(resources, "0000000001")
 			elif command == "2":
-				send_code("0000000002")
+				send_code(resources, "0000000002")
 			elif command == "3":
-				send_code("0000000003")
+				send_code(resources, "0000000003")
+			else:
+				command = command.split()
+				mac = command[1]
+				send_code(resources, command[1])
