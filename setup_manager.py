@@ -1,38 +1,34 @@
 import os.path 
 import urllib, urllib2, time
 from datetime import datetime
+import sqlite3 as lite
 
 class Setup_Manager:
 
-    def __init__(self, server_url, device, mac):
-        self.server_url = server_url
-        self.device = device
+    def __init__(self, server_address, reading_device, mac):
+        self.server_address = server_address
+        self.reading_device = reading_device
         self.mac = mac
 
-        self.io_status = False
-        self.db_status = False
-        self.server_status = False
+        self.io_works = False
+        self.db_works = False
+        self.server_works = False
 
     def check_io(self):
-        if os.path.exists(self.device):
-            self.io_status = True
-            print(self.device + " founded")
+        if os.path.exists(self.reading_device):
+            self.io_works = True
         else:
-            self.io_status = False
-            print(self.device + " no founded")
+            self.io_works = False
 
     def check_db (self):
         try:
-            import sqlite3 as lite
             connection = lite.connect('checkIn.db')
             cursor = connection.cursor()
             cursor.execute('create table if not exists checkIns(url text(63), time datetime)')
             data = cursor.fetchone()
-            self.db_status = True
-            print("Database Ready")
+            self.db_works = True
         except lite.Error, e:
-            self.db_status = False
-            print("Database not Ready")
+            self.db_works = False
 
     def check_server(self):
         url = self.server_url + 'checkin/status/'

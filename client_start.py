@@ -8,12 +8,6 @@ import urllib, urllib2, time
 import sys, getopt
 from threading import Thread
 
-dbname = 'checkIn.db'
-RFID_device = '/dev/input/event16'
-server_adress = 'http://localhost:8000/'
-RFID_code_length = 10
-mac = get_mac()
-
 def send_alive(resources):
     while True:
         resources.check_server()
@@ -21,74 +15,71 @@ def send_alive(resources):
             print "Not autenticated"
         sleep(5)
 
-def send_code(card_code, device_id):
-    print "Sending code: ", card_code, "from host: ", device_id 
-    url = server_adress + 'checkin/'
-    now = datetime.now()
+def send_code(card_code, server_address, mac_addres):
+    url = server_address + 'checkin/'
+    time_now = datetime.now()
 
-    values = {'mac' : device_id,'key' : card_code,'time' : now}
-    global server_status
+    values = {'mac' : mac_addres,'key' : card_code,'time' : time_now}
     try:
         data = urllib.urlencode(values)
         req = urllib2.Request(url, data)
         response = urllib2.urlopen(req)
-        the_page = response.read()
 
-        if the_page == "ok":
-            print card_code + " checked successfully at " + str(now)
-        else:
-            print card_code + " check failed at " + str(now)
+        if response.getcode() == 200:
+            print "checked successfully"
+        elif response.getcode() == 401:
+            print 'Client is not autenticated'
+        elif response.getcode() == 404:
+            print 'Server not found'
+        print card_code
     except Exception, detail:
         print detail
         print values
 
 if __name__ == '__main__':
-    
-    if len(sys.argv) <= 1:
-        print "Use -start for starting the client in normal mode"
-        print "Use -debug for using the debug mode"
-        sys.exit(0)
+    db_name = 'checkIn.db'
+    reading_device_address = '/dev/input/event16'
+    server_address = 'http://localhost:8000/'
+    mac = get_mac()
 
-    resources = Setup_Manager(server_adress, RFID_device, mac)
-
-    if sys.argv[1] == "-start":
-
-        thread = Thread(target = send_alive, args = (resources, ))
-        thread.start()
-        #Check for IO DB untill they are available
-        while (resources.io_status == False or resources.db_status == False):
-            resources.check_io()
-            resources.check_db()
-            resources.check_server()
-            #TODO: Indicate in some way that we are not ready to work. 
-            sleep(3)
-
-        #Start reading from RFID reader
-        dev = InputDevice(RFID_device)
-        print (dev)
-
-        cartKey = ""
-        for event in dev.read_loop():
-            if event.type == ecodes.EV_KEY and event.value == 1:
-                cartKey += (ecodes.KEY[event.code][-1:])
-            if len(cartKey) >= RFID_code_length + 1:
-                #We have a code lets send it to the server
-                send_code(cartKey[0:RFID_code_length])
-                cartKey = ""
-
-    if sys.argv[1] == "-debug":
+    if sys.argv == '-debug':
+        # DEBUG MODE
         while True:
             print "\nPress 1 for 0000000001\nPress 2 for 0000000002\nPress 3 for 0000000003\nOr type a command like [send CODE MAC]"
             command = raw_input();
-            mac = get_mac()
             if command == "1":
-                send_code("0000000001", mac)
+                send_code("0000000001", server_address, mac)
             elif command == "2":
-                send_code("0000000002", mac)
+                send_code("0000000002", server_address, mac)
             elif command == "3":
-                send_code("0000000003", mac)
+                send_code("0000000003", server_address, mac)
             else:
                 command = command.split()
                 code = command[1]
                 mac = command[2]
                 send_code(code, mac)
+    else:
+        # NORMAL MODE
+        resources = Setup_Manager(server_address, reading_device_address, mac)
+
+        while not resources.io_works and not resources.db_works:
+            resources.check_io()
+            resources.check_db()
+        
+            print 'IO works: ' + str(resources.io_works)
+            print 'DB works: ' + str(resources.db_works)
+            print '=============='
+            sleep(1)
+        
+        reading_device = InputDevice(reading_device_address)
+        print reading_device
+
+        cart_key = ''
+        for event in reading_device.read_loop():
+            if event.type == ecodes.EV_KEY and event.value == 1:
+                cart_key += (ecodes.KEY[event.code][-1:])
+
+                if ecodes.KEY[event.code][-1:] == 'R': #R is in the end of each code
+                    #We have a code lets send it to the server
+                    send_code(cart_key[0:10], server_address, mac)
+                    cart_key = ''
