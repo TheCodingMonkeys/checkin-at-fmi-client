@@ -42,7 +42,7 @@ if __name__ == '__main__':
     server_address = 'http://192.168.0.101:8000/'
     mac = get_mac()
 
-    if sys.argv == '-debug':
+    if sys.argv[1] == '-debug':
         # DEBUG MODE
         while True:
             print "\nPress 1 for 0000000001\nPress 2 for 0000000002\nPress 3 for 0000000003\nOr type a command like [send CODE MAC]"
