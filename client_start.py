@@ -38,8 +38,8 @@ def send_code(card_code, server_address, mac_addres):
 
 if __name__ == '__main__':
     db_name = 'checkIn.db'
-    reading_device_address = '/dev/input/event16'
-    server_address = 'http://localhost:8000/'
+    reading_device_address = '/dev/input/event0'
+    server_address = 'http://192.168.0.101:8000/'
     mac = get_mac()
 
     if sys.argv == '-debug':
