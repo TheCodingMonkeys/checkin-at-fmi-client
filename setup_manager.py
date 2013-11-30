@@ -31,7 +31,7 @@ class Setup_Manager:
             self.db_works = False
 
     def check_server(self):
-        url = self.server_url + 'checkin/status/'
+        url = self.server_address + 'checkin/status/'
         values = {'mac' : self.mac,}
 
         try:
@@ -39,13 +39,12 @@ class Setup_Manager:
             data = urllib.urlencode(values)          
             req = urllib2.Request(url, data)
             response = urllib2.urlopen(req)
-            answer = response.read() 
-            if answer == "ok":
-                self.server_status = True;
+            if response.getcode() == 200:
+                self.server_works = True;
                 print(url + " accepted us")
-            else:
-                self.server_status = False
+            elif response.getcode() == 401:
+                self.server_works = False
                 print(url + " did not accept us")
         except Exception, detail:
-            self.server_status = False
+            self.server_works = False
             print("Error conectiong to the server")

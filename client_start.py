@@ -42,12 +42,16 @@ if __name__ == '__main__':
     server_address = 'http://192.168.0.101:8000/'
     mac = get_mac()
 
-    if sys.argv[1] == '-debug':
+    resources = Setup_Manager(server_address, reading_device_address, mac)
+
+    if len(sys.argv) > 1:
         # DEBUG MODE
         while True:
-            print "\nPress 1 for 0000000001\nPress 2 for 0000000002\nPress 3 for 0000000003\nOr type a command like [send CODE MAC]"
+            print "\nPress 0 for sending status code\nPress 1 for 0000000001\nPress 2 for 0000000002\nPress 3 for 0000000003\nOr type a command like [send CODE MAC]"
             command = raw_input();
-            if command == "1":
+            if command == "0":
+            	resources.check_server()
+            elif command == "1":
                 send_code("0000000001", server_address, mac)
             elif command == "2":
                 send_code("0000000002", server_address, mac)
@@ -60,7 +64,6 @@ if __name__ == '__main__':
                 send_code(code, mac)
     else:
         # NORMAL MODE
-        resources = Setup_Manager(server_address, reading_device_address, mac)
 
         while not resources.io_works and not resources.db_works:
             resources.check_io()
