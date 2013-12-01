@@ -39,7 +39,7 @@ def send_code(card_code, server_address, mac_addres):
 if __name__ == '__main__':
     db_name = 'checkIn.db'
     reading_device_address = '/dev/input/event0'
-    server_address = 'http://192.168.0.101:8000/'
+    server_address = 'http://checkin.zala100.com/'
     mac = get_mac()
 
     resources = Setup_Manager(server_address, reading_device_address, mac)
