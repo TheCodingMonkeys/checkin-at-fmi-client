@@ -94,5 +94,5 @@ if __name__ == '__main__':
 
                 if ecodes.KEY[event.code][-1:] == 'R': #R is in the end of each code
                     #We have a code lets send it to the server
-                    send_code(cart_key[0:10], server_address, device_key
+                    send_code(cart_key[0:10], server_address, device_key)
                     cart_key = ''
