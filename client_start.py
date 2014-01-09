@@ -3,10 +3,11 @@ from datetime import datetime
 from evdev import InputDevice, categorize, ecodes
 from select import select
 from setup_manager import Setup_Manager
-from uuid import getnode as get_mac
 import urllib, urllib2, time
 import sys, getopt
 from threading import Thread
+import os.path
+import random
 
 def send_alive(resources):
     while True:
@@ -15,11 +16,22 @@ def send_alive(resources):
             print "Not autenticated"
         sleep(5)
 
-def send_code(card_code, server_address, mac_addres):
+def get_key():
+    key_file_name = 'unique.key'
+
+    if os.path.isfile(key_file_name):
+        hash_code = tuple(open(key_file_name, 'r'))[0]
+    else:
+        hash_code = os.urandom(16).encode('hex')
+        with open(key_file_name, 'w') as key_file: key_file.write(hash_code)
+    
+    return hash_code
+
+def send_code(card_code, server_address, device_key):
     url = server_address + 'checkin/'
     time_now = datetime.now()
 
-    values = {'mac' : mac_addres,'key' : card_code,'time' : time_now}
+    values = {'mac' : device_key,'key' : card_code,'time' : time_now}
     try:
         data = urllib.urlencode(values)
         req = urllib2.Request(url, data)
@@ -40,9 +52,8 @@ if __name__ == '__main__':
     db_name = 'checkIn.db'
     reading_device_address = '/dev/input/event0'
     server_address = 'http://checkin.zala100.com/'
-    mac = get_mac()
-
-    resources = Setup_Manager(server_address, reading_device_address, mac)
+    device_key = get_key()
+    resources = Setup_Manager(server_address, reading_device_address, device_key)
 
     if len(sys.argv) > 1:
         # DEBUG MODE
@@ -52,19 +63,18 @@ if __name__ == '__main__':
             if command == "0":
             	resources.check_server()
             elif command == "1":
-                send_code("0000000001", server_address, mac)
+                send_code("0000000001", server_address, device_key)
             elif command == "2":
-                send_code("0000000002", server_address, mac)
+                send_code("0000000002", server_address, device_key)
             elif command == "3":
-                send_code("0000000003", server_address, mac)
+                send_code("0000000003", server_address, device_key)
             else:
                 command = command.split()
                 code = command[1]
-                mac = command[2]
-                send_code(code, mac)
+                key = command[2]
+                send_code(code, device_key)
     else:
         # NORMAL MODE
-
         while not resources.io_works and not resources.db_works:
             resources.check_io()
             resources.check_db()
@@ -84,5 +94,5 @@ if __name__ == '__main__':
 
                 if ecodes.KEY[event.code][-1:] == 'R': #R is in the end of each code
                     #We have a code lets send it to the server
-                    send_code(cart_key[0:10], server_address, mac)
+                    send_code(cart_key[0:10], server_address, device_key())
                     cart_key = ''
