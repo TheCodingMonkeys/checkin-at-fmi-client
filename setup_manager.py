@@ -47,4 +47,5 @@ class Setup_Manager:
                 print(url + " did not accept us")
         except Exception, detail:
             self.server_works = False
+	    print detail
             print("Error conectiong to the server")
