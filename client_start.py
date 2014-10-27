@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from time import time, sleep
 from datetime import datetime
 from select import select
@@ -29,6 +30,8 @@ def get_key():
 
 
 def send_code(card_code, server_address, device_key):
+    print "sending code"
+    print card_code
     url = server_address + 'checkin/'
     time_now = datetime.now()
 
@@ -55,6 +58,7 @@ if __name__ == '__main__':
     reading_device_address = '/dev/input/event0'
     server_address = 'http://checkin.zala100.com/'
     dev_server_address = 'http://127.0.0.1:8000/'
+    # dev_server_address = server_address # DEBUG
     device_key = get_key()
     resources = Setup_Manager(server_address, reading_device_address, device_key)
 
@@ -64,7 +68,7 @@ if __name__ == '__main__':
             print "\nPress 0 for sending status code\nPress 1 for 0000000001\nPress 2 for 0000000002\nPress 3 for 0000000003\nOr type a command like [send CODE MAC]"
             command = raw_input();
             if command == "0":
-            	resources.check_server()
+                resources.check_server()
             elif command == "1":
                 send_code("0000000001", dev_server_address, device_key)
             elif command == "2":
@@ -77,26 +81,9 @@ if __name__ == '__main__':
                 key = command[2]
                 send_code(code, device_key)
     else:
-	from evdev import InputDevice, categorize, ecodes
-        # NORMAL MODE
-        while not resources.io_works and not resources.db_works:
-            resources.check_io()
-            resources.check_db()
-        
-            print 'IO works: ' + str(resources.io_works)
-            print 'DB works: ' + str(resources.db_works)
-            print '=============='
-            sleep(1)
-        
-        reading_device = InputDevice(reading_device_address)
-        print reading_device
+        import serial
+        with serial.Serial(port='COM3', baudrate=9600, timeout=1,
+                       xonxoff=False, rtscts=False, dsrdtr=True) as s:
+            for line in s:
+                send_code(line, server_address, device_key)
 
-        cart_key = ''
-        for event in reading_device.read_loop():
-            if event.type == ecodes.EV_KEY and event.value == 1:
-                cart_key += (ecodes.KEY[event.code][-1:])
-
-                if ecodes.KEY[event.code][-1:] == 'R': #R is in the end of each code
-                    #We have a code lets send it to the server
-                    send_code(cart_key[0:10], server_address, device_key)
-                    cart_key = ''
